@@ -1,5 +1,14 @@
+ var ip="10.201.136.178";
+ var socket = io.connect(ip+':3000');
+  socket.on('news', function (data) {
+    console.log(data);
+    socket.emit('my other event', { my: 'data' });
+  });
+
 var game = new Phaser.Game(800, 600, Phaser.AUTO, 'phaser-example', { preload: preload, create: create });
 var squareSize= 90; 
+var timerBase = 10;
+var moveBase = -1;
 function preload() {
 
     game.load.spritesheet('button', '/images/number-buttons-90x90.png', squareSize, squareSize);
@@ -13,9 +22,9 @@ var draw_coordinates= [[0,0], [0,squareSize], [squareSize,0], [squareSize,square
 var character;
 var midFiller =29;
 var text;
-var timer_count=10;
+var timer_count=timerBase;
 var message="Choose your move:";
-var moveTo=-1;
+var moveTo=moveBase;
 function create() {
 
     game.stage.backgroundColor = '#00FFFF';
@@ -28,13 +37,13 @@ function create() {
         draw_coordinates[0][1]+midFiller,'character')
     
     text = game.add.text(game.world.centerX+100, game.world.centerY-250,
-        message, {
+        message+timerBase, {
         font: "30px Arial",
         fill: "#ff0044",
         align: "center"
     });
     text.anchor.setTo(0.5,0.5)
-    timer = game.time.events.loop(Phaser.Timer.SECOND, updateTimer);
+    timer = setInterval(updateTimer, 1000);
 }
 
 function actionOnClick () {
@@ -53,12 +62,19 @@ function updateTimer() {
 
     if(timer_count <= 0 )
     {
-        game.time.events.stop(timer);
+        clearInterval(timer);
         text.setText("Finished");
-        if (moveTo != -1) 
+        timer_count = timerBase; 
+        if (moveTo != moveBase) 
         {
             move(moveTo);
         }
-
+        reset();
     }
+}
+
+function reset(){
+    timer = setInterval(updateTimer, 1000);
+    moveTo = moveBase;
+
 }
