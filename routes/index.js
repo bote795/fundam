@@ -2,7 +2,7 @@ var express = require('express');
 var passport = require('passport');
 var Account = require('../models/account');
 var router = express.Router();
-
+var theDeviceSocket;
 
 router.get('/', function (req, res) {
     res.render('index', { user : req.user });
@@ -30,7 +30,7 @@ router.get('/login', function(req, res) {
 });
 
 router.post('/login', passport.authenticate('local'), function(req, res) {
-    res.redirect('/');
+    res.redirect('/game');
 });
 
 router.get('/logout', function(req, res) {

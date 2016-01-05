@@ -1,9 +1,44 @@
  var ip="10.201.136.178";
  var socket = io.connect(ip+':3000');
-  socket.on('news', function (data) {
-    console.log(data);
-    socket.emit('my other event', { my: 'data' });
-  });
+
+socket.on('connected', function (data) {
+    redrawRooms(data.rooms);
+    console.log(data.connectedRooms);
+});
+socket.on('playerJoinedGame', function (data) {
+    console.log("the player has joined game"+ data.userName)
+});
+
+
+function roomNamesTemplate (key) {
+   return "<li> <a href='#selectRoom'>"+
+        key
+   +"</a></li>"; 
+}
+
+$("#newRoom").submit(function (ev) {
+    var val = $("input:first").val();
+    socket.emit("hostCreateNewGame", { name: val});
+    ev.preventDefault();
+});
+
+function redrawRooms (rooms) {
+    var $list = $("#roomNames");
+    $list.empty();
+        for (var key in rooms) {
+             $list.append(roomNamesTemplate(key));
+         }; 
+    addSelectRoom();
+}
+function addSelectRoom()
+{
+    $("a[href='#selectRoom']").on("click",function (event) {
+        var userName = $("#userName").text();
+        socket.emit("playerJoinGame", { name: this.text, userName: userName});
+    });
+}
+
+//game data
 
 var game = new Phaser.Game(800, 600, Phaser.AUTO, 'phaser-example', { preload: preload, create: create });
 var squareSize= 90; 
@@ -43,7 +78,6 @@ function create() {
         align: "center"
     });
     text.anchor.setTo(0.5,0.5)
-    timer = setInterval(updateTimer, 1000);
 }
 
 function actionOnClick () {

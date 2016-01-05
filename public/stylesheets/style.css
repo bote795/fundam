@@ -2,7 +2,12 @@ body {
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
-
+#room{
+	float: right;
+	position: fixed;
+	right: 100px;
+	top: 100px;
+}
 a {
   color: #00B7FF;
 }
