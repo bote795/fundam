@@ -6,36 +6,68 @@ socket.on('connected', function (data) {
     console.log(data.connectedRooms);
 });
 socket.on('playerJoinedGame', function (data) {
-    console.log("the player has joined game"+ data.userName)
+    console.log("the players name is "+ data.userName);
+    $('#Number').text(data.num);
+});
+
+socket.on('newGameCreated', function (data) {
+    console.log("the player created a new game named: "+ data.name);
+    $('#Number').text(1);
+});
+socket.on('newRoom', function (data) {
+    if($('#Number').text()=="")
+    {
+        redrawRooms(data.rooms);
+    }
+});
+socket.on('error', function (data) {
+    console.log(data.message);
 });
 
 
-function roomNamesTemplate (key) {
-   return "<li> <a href='#selectRoom'>"+
-        key
-   +"</a></li>"; 
-}
+
 
 $("#newRoom").submit(function (ev) {
+    var userName = $("#userName").text();
     var val = $("input:first").val();
-    socket.emit("hostCreateNewGame", { name: val});
+    socket.emit("hostCreateNewGame", { name: val, userName: userName});
     ev.preventDefault();
+    joinRoomUI(val);
 });
 
+//used to refresh html for rooms
 function redrawRooms (rooms) {
     var $list = $("#roomNames");
     $list.empty();
         for (var key in rooms) {
              $list.append(roomNamesTemplate(key));
          }; 
-    addSelectRoom();
+    SelectRoom();
 }
-function addSelectRoom()
+//html for rooms
+function roomNamesTemplate (key) {
+   return "<li> <a href='#selectRoom'>"+
+        key
+   +"</a></li>"; 
+}
+//function used to put listerners on a href to click
+//to select a currentl existing room
+function SelectRoom()
 {
     $("a[href='#selectRoom']").on("click",function (event) {
         var userName = $("#userName").text();
         socket.emit("playerJoinGame", { name: this.text, userName: userName});
+        joinRoomUI(this.text);
     });
+}
+
+function joinRoomUI (name) 
+{
+    $('#roomNames').hide();
+    $('#newRoom').hide();
+    $('#phaser-example').toggle();
+    var title = "\t room:" + name;
+    $("#userName").append("<h2>"+title+"</h2>")
 }
 
 //game data

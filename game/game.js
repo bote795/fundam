@@ -24,10 +24,13 @@ exports.initGame = function(sio, socket){
 
 function hostCreateNewGame(data) 
 {
+    var socket = this;
     //create a new room and join
-    this.join(data.name);
+    socket.join(data.name);
     console.log("joined new room"+data.name);
     console.log(this.rooms);
+    socket.emit('newGameCreated', {name: data.name, userName: data.userName});
+    io.emit("newRoom", {rooms:  io.sockets.adapter.rooms})
 };
 
 function playerJoinGame (data) {
@@ -35,8 +38,11 @@ function playerJoinGame (data) {
     var room = io.sockets.adapter.rooms[data.name];
     if (room)
     {
+        console.log(data.name);
         socket.leave(socket.rooms[0]);
         socket.join(data.name);
+        data.num= Object.keys(io.sockets.adapter.rooms[data.name]).length;
+        console.log(data.num);
         io.sockets.in(data.name).emit('playerJoinedGame',data)
     }
     else
