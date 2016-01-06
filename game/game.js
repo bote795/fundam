@@ -10,9 +10,16 @@ var readys={};
 exports.initGame = function(sio, socket){
     io = sio;
     gameSocket = socket;
-    gameSocket.emit('connected', { message: "You are connected! Choose a room" , rooms:  io.sockets.adapter.rooms,
-    connectedRooms: socket.rooms});
 
+    
+    socket.join('lobby');
+    socket.leave(socket.id);
+
+    rooms = io.sockets.adapter.rooms;
+    delete rooms['lobby'];
+
+    gameSocket.emit('connected', { message: "You are connected! Choose a room" , rooms:  rooms,
+    connectedRooms: socket.rooms});
     // Host Events
     gameSocket.on('hostCreateNewGame', hostCreateNewGame);
 
@@ -32,8 +39,10 @@ function hostCreateNewGame(data)
     socket.join(data.name);
     console.log("joined new room"+data.name);
     console.log(this.rooms);
+    rooms = io.sockets.adapter.rooms;
+    delete rooms['lobby'];
     socket.emit('newGameCreated', {name: data.name, userName: data.userName, player: 1});
-    io.emit("newRoom", {rooms:  io.sockets.adapter.rooms})
+    io.emit("newRoom", {rooms:  rooms})
 };
 
 

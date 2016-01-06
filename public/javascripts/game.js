@@ -94,6 +94,7 @@ function joinRoomUI (name)
     $('#roomNames').hide();
     $('#newRoom').hide();
     $('#phaser-example').toggle();
+    $("#ready").toggle();
     var title = "\t room:" + name;
     roomName=name;
     $("#userName").append("<h2>"+title+"</h2>")
