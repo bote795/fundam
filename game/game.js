@@ -1,6 +1,6 @@
 var io;
 var gameSocket;
-
+var readys={};
 /**
  * This function is called by index.js to initialize a new game instance.
  *
@@ -18,9 +18,12 @@ exports.initGame = function(sio, socket){
 
     // Player Events
     gameSocket.on('playerJoinGame', playerJoinGame);
-        console.log(socket.rooms);
+    gameSocket.on('playerMove', playerMove);
+    gameSocket.on('ready',ready);
+    console.log(socket.rooms);
 
 }
+//host
 
 function hostCreateNewGame(data) 
 {
@@ -29,9 +32,12 @@ function hostCreateNewGame(data)
     socket.join(data.name);
     console.log("joined new room"+data.name);
     console.log(this.rooms);
-    socket.emit('newGameCreated', {name: data.name, userName: data.userName});
+    socket.emit('newGameCreated', {name: data.name, userName: data.userName, player: 1});
     io.emit("newRoom", {rooms:  io.sockets.adapter.rooms})
 };
+
+
+//player
 
 function playerJoinGame (data) {
     var socket = this;
@@ -43,6 +49,7 @@ function playerJoinGame (data) {
         socket.join(data.name);
         data.num= Object.keys(io.sockets.adapter.rooms[data.name]).length;
         console.log(data.num);
+        data.player =2;
         io.sockets.in(data.name).emit('playerJoinedGame',data)
     }
     else
@@ -50,4 +57,23 @@ function playerJoinGame (data) {
         socket.emit('error', {message: "This room doesn't exist"});
     }
 
+}
+function playerMove (data) {
+    io.sockets.in(data.room).emit('playerMove',data);
+}
+function ready (data) {
+    console.log('ready');
+    if (readys.hasOwnProperty(data.room)) 
+    {
+        var array= readys[data.room];
+        array.push(data.userName);
+    }
+    else
+        readys[data.room]=[data.userName];
+    console.log(readys);
+    if(readys[data.room].length ==2)
+    {
+        io.sockets.in(data.room).emit('start');
+        console.log("sent start");
+    }
 }
