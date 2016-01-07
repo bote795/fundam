@@ -1,4 +1,5 @@
  var ip="10.201.136.178";
+ ip="192.168.1.25";
  var socket = io.connect(ip+':3000');
  var player=0;
  var pplNumRoom=0;
@@ -114,16 +115,25 @@ function preload() {
     game.load.spritesheet('health', '/images/spritesheets/player_health.png', 48, 6);
 }
 
+//array of four buttons to move to
 var button=[];
-var background;
+//coordinates of where the squarestop left corner is
 var draw_coordinates= [[0,0], [0,squareSize], [squareSize,0], [squareSize,squareSize]]
+//will keep players
+//index 0, will be player 1, index 1 player 2
 var character=[];
 var midFiller =29;
 var text;
 var timer_count=timerBase;
 var message="Choose your move:";
+//moveTo which is a variable to keep track if a square was pressed
 var moveTo=moveBase;
+//will keep which sprite to load on who
+//index 0, will be player 1, index 1 player 2
 var loadout=[];
+var offset = new Phaser.Point(9, 12);
+var shadow;
+var actions=[melee,range,defend];
 function create() {
 
     game.stage.backgroundColor = '#00FFFF';
@@ -132,13 +142,17 @@ function create() {
          'button', actionOnClick, i, null, i));
         button[i].id=i;
     };
+    for (var i = 1; i < actions.length+1; i++) {
+        button.push(game.add.button(i*100, 200,
+         'button', actions[i-1], this, null, 1));
+        
+    };
     loadout.push("characterN");
     loadout.push("characterT");
 
 
     character.push( game.add.sprite(draw_coordinates[0][0]+midFiller,
         draw_coordinates[0][1]+midFiller,loadout[0]));
-
     addCharacter();
     text = game.add.text(game.world.centerX+100, game.world.centerY-250,
         message+timerBase, {
@@ -146,27 +160,57 @@ function create() {
         fill: "#ff0044",
         align: "center"
     });
+    text.anchor.setTo(0.5,0.5);
+    //player x
+    game.add.text(game.world.centerX+100, game.world.centerY-300,
+    "Player"+player, {
+    font: "30px Arial",
+    fill: "#ff0044",
+    align: "center"
+    });
+    text.anchor.setTo(0.5,0.5)
+    game.add.text(game.world.centerX+100, game.world.centerY-200,
+    "Todo", {
+    font: "30px Arial",
+    fill: "#ff0044",
+    align: "center"
+    });
     text.anchor.setTo(0.5,0.5)
 }
+//adds second player when second player joins lobby
 function addCharacter()
 {
     if(pplNumRoom ==2 && character.length <= 1)
     {
-
         character.push( game.add.sprite(draw_coordinates[3][0]+midFiller,
-        draw_coordinates[3][1]+midFiller,loadout[1]));    
+        draw_coordinates[3][1]+midFiller,loadout[1])); 
+        //shadow for player
+        shadow = game.add.sprite(character[player-1].x + offset.x,character[player-1].y + offset.y,character[player-1].key);   
+        shadow.anchor.set(0.5);
+        shadow.tint = 0xff0000;
+        shadow.alpha = 0.5;
     }
 }
+//saves the id of clicked square of where to move
 function actionOnClick () {
     moveTo = arguments[0].id;
 }
-
+//moves player to x,y
+//@params pl = player id of which to move
+//@param id = id of which square to move to
 function move(pl,id)
 {
     character[pl].x = draw_coordinates[id][0]+midFiller;
     character[pl].y = draw_coordinates[id][1]+midFiller;
-}
 
+    if (pl == player-1)
+    {
+        shadow.x = character[pl].x + offset.x;
+        shadow.y = character[pl].y + offset.y;
+    };
+}
+//function to update how many seconds left
+//and when time is over sends movement data
 function updateTimer() {
     timer_count -=1;
     text.setText(message+timer_count);
@@ -183,9 +227,22 @@ function updateTimer() {
         reset();
     }
 }
-
+//function to reset time interval 
+//and moveTo which is a variable to keep track if a square was pressed
 function reset(){
     timer = setInterval(updateTimer, 1000);
     moveTo = moveBase;
 
+}
+function melee()
+{
+    console.log("melee");
+}
+function range()
+{
+    console.log("range");
+}
+function defend()
+{
+    console.log("defend");
 }

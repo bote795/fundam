@@ -27,7 +27,6 @@ exports.initGame = function(sio, socket){
     gameSocket.on('playerJoinGame', playerJoinGame);
     gameSocket.on('playerMove', playerMove);
     gameSocket.on('ready',ready);
-    console.log(socket.rooms);
 
 }
 //host
