@@ -1,11 +1,10 @@
  var ip="10.201.136.178";
- ip="192.168.1.25";
+ //ip="192.168.1.25";
  var socket = io.connect(ip+':3000');
  var player=0;
  var pplNumRoom=0;
  var userName;
  var roomName;
-
 //socket requests 
 socket.on('connected', function (data) {
     redrawRooms(data.rooms);
