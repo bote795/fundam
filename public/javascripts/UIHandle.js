@@ -30,7 +30,6 @@ socket.on('newRoom', function (data) {
 });
 socket.on('start', function (data) {
     console.log("start");
-    $("#ready").toggle();
     game.state.start('Game');
     //MainGame.MainMenuState.prototype.start();
 });
@@ -92,7 +91,6 @@ function joinRoomUI (name)
     $('#roomNames').hide();
     $('#newRoom').hide();
     $('#phaser-example').toggle();
-    $("#ready").toggle();
     var title = "\t room:" + name;
     roomName=name;
     $("#userName").append("<h2>"+title+"</h2>")

@@ -74,7 +74,8 @@ function ready (data) {
     if (readys.hasOwnProperty(data.room)) 
     {
         var array= readys[data.room];
-        array.push(data.userName);
+        if (array.indexOf(data.userName) == -1)
+            array.push(data.userName);
     }
     else
         readys[data.room]=[data.userName];

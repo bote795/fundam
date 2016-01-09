@@ -29,8 +29,8 @@ MainGame.GameState.prototype = {
 	        button[i].id=i;
 	    };
 	    for (var i = 1; i < actions.length+1; i++) {
-	        button.push(this.game.add.button(i*100, 200,
-	         'button', actions[i-1], this, null, 1));
+	        button.push(this.game.add.button(i*180, 200,
+	         'action_buttons', actions[i-1], this, null, i-1));
 	        
 	    };
 	    if (player ==1 ) 
