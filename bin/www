@@ -3,9 +3,8 @@
 /**
  * Module dependencies.
  */
-
 var app = require('../app');
-var debug = require('debug')('passport-local-express42:server');
+var debug = require('debug')('http');
 var http = require('http');
 var game = require('../game/game');
 /**

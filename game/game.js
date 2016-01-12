@@ -1,6 +1,8 @@
 var io;
 var gameSocket;
 var readys={};
+var roomNames={};
+
 /**
  * This function is called by index.js to initialize a new game instance.
  *
@@ -13,12 +15,9 @@ exports.initGame = function(sio, socket){
 
     
     socket.join('lobby');
-    socket.leave(socket.id);
+    //socket.leave(socket.id);
 
-    rooms = io.sockets.adapter.rooms;
-    delete rooms['lobby'];
-
-    gameSocket.emit('connected', { message: "You are connected! Choose a room" , rooms:  rooms,
+    gameSocket.emit('connected', { message: "You are connected! Choose a room" , rooms:  roomNames,
     connectedRooms: socket.rooms});
     // Host Events
     gameSocket.on('hostCreateNewGame', hostCreateNewGame);
@@ -27,6 +26,7 @@ exports.initGame = function(sio, socket){
     gameSocket.on('playerJoinGame', playerJoinGame);
     gameSocket.on('playerMove', playerMove);
     gameSocket.on('ready',ready);
+    gameSocket.on('disconnect',disconnect);
 
 }
 //host
@@ -36,12 +36,12 @@ function hostCreateNewGame(data)
     var socket = this;
     //create a new room and join
     socket.join(data.name);
+    socket.leave('lobby');
     console.log("joined new room"+data.name);
     console.log(this.rooms);
-    rooms = io.sockets.adapter.rooms;
-    delete rooms['lobby'];
+    roomNames[data.name] =[socket.id];
     socket.emit('newGameCreated', {name: data.name, userName: data.userName, player: 1});
-    io.emit("newRoom", {rooms:  rooms})
+    io.emit("newRoom", {rooms:  roomNames})
 };
 
 
@@ -53,11 +53,12 @@ function playerJoinGame (data) {
     if (room)
     {
         console.log(data.name);
-        socket.leave(socket.rooms[0]);
+        socket.leave('lobby');
         socket.join(data.name);
         data.num= Object.keys(io.sockets.adapter.rooms[data.name]).length;
         console.log(data.num);
         data.player =2;
+        roomNames[data.name].push(socket.id);
         io.sockets.in(data.name).emit('playerJoinedGame',data)
     }
     else
@@ -84,5 +85,24 @@ function ready (data) {
     {
         io.sockets.in(data.room).emit('start');
         console.log("sent start");
+    }
+}
+
+function disconnect () {
+    console.log("disconnected");
+    for (var key in roomNames)
+    {
+        var test = roomNames[key];
+        console.log(gameSocket.id);
+       for (var j = 0; j < test.length; j++) {
+           if(roomNames[key][j] == gameSocket.id)
+           {
+                roomNames[key].splice(j,1);
+                if (roomNames[key]==0) 
+                {
+                    delete roomNames[key]
+                };
+           }
+       };
     }
 }
